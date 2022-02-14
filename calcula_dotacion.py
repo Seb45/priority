@@ -274,7 +274,7 @@ if informe=="Detalle un dia":
     st.sidebar.text("Umbral: "+str(configuracion.loc[0,"umbral"]))
     st.sidebar.text("Tasa Aband: "+str(configuracion.loc[0,"tasa_aband"])) 
     ahora=dt.datetime.now()
-    fecha_informe=st.sidebar.date_input('Fecha', dt.date(ahora.year, ahora.month, ahora.day))
+    fecha_informe=st.sidebar.date_input('Fecha', dt.date(ahora.year, 1, 3))
     dato_intervalos=pd.read_sql('SELECT Intervalo, Volumen_pronostico, rac_nec, workload, workload/rac_nec as ocupacion from resultados where fecha = "'+str(fecha_informe)+'"', con)
     fig1 = make_subplots(specs=[[{"secondary_y": True}]])
  
