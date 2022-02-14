@@ -174,9 +174,14 @@ if informe=="Configuracion":
         datos["ocupacion"]=datos["workload"]/datos["rac_nec"]
         datos.to_sql("resultados", con, if_exists="replace")  
     
-    resultados=pd.read_sql('SELECT * from resultados', con)
-    total_llamadas=resultados["Volumen_pronostico"].sum()
-    st.text(total_llamadas)
+        resultados=pd.read_sql('SELECT * from resultados', con)
+        total_llamadas=resultados["Volumen_pronostico"].sum()
+        st.success("Datos actualizados y se calcularon nuevamente los parametros")
+    else:
+        st.header("Analisis dimensionamiento y avail diseño")
+        st.subheader("Priority Argentina Enero2022")
+        st.text("por favor elija una opcion del menú")
+        # st.text(total_llamadas)
     # print (total_llamadas)
     # workload=resultados["workload"].sum()/2
     # total_horas_rac_erlang=resultados["rac_nec"].sum()/2
@@ -194,16 +199,17 @@ if informe=="Configuracion":
     # st.table(grupo_fecha)
 if informe=="Valores consolidades mes y diarios":
     configuracion=pd.read_sql('SELECT * from configuracion', con)
+    st.sidebar.text("Datos de configuración")
     st.sidebar.text("TMO: "+str(configuracion.loc[0,"tmo"]))
     st.sidebar.text("Nivel Servicio: "+str(configuracion.loc[0,"ns"]))
     st.sidebar.text("Umbral: "+str(configuracion.loc[0,"umbral"]))
     st.sidebar.text("Tasa Aband: "+str(configuracion.loc[0,"tasa_aband"])) 
-    dato_mes=pd.read_sql('SELECT mes, sum(Volumen_pronostico) as volumen_prono, sum(rac_nec)/2 as horas_racs_prod, sum(workload)/2 as workload, sum(workload)/sum(rac_nec) as ocupacion from resultados group by mes', con)
-    st.table(dato_mes)
+    dato_mes=pd.read_sql('SELECT mes, sum(Volumen_pronostico) as volumen_prono, sum(rac_nec)/2 as horas_racs_prod, sum(workload)/2 as workload, 100*sum(workload)/sum(rac_nec) as ocupacion from resultados group by mes', con)
+    st.table(dato_mes.style.format('{:7,.1f}'))
     
     racs_nominales=int(dato_mes.loc[0,"horas_racs_prod"]/120/.76)
     st.text("Racs nominales 120hs mes: "+str(racs_nominales))
-    dato_dia=pd.read_sql('SELECT Fecha, sum(Volumen_pronostico) as volumen_prono, sum(rac_nec)/2 as horas_racs_prod, sum(workload)/2 as workload, sum(workload)/sum(rac_nec) as ocupacion from resultados group by Fecha', con)
+    dato_dia=pd.read_sql('SELECT Fecha, sum(Volumen_pronostico) as volumen_prono, sum(rac_nec)/2 as horas_racs_prod, sum(workload)/2 as workload, 100*sum(workload)/sum(rac_nec) as ocupacion from resultados group by Fecha', con)
 
     
     # fig1 = go.Figure()
