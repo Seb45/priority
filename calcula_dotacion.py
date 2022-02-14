@@ -150,7 +150,7 @@ def main():
 # if __name__ == "__main__":
 #     main()
 
-informe = st.sidebar.selectbox('Elegí una de las opciones', ("Configuracion", 'Valores consolidades mes y diarios', 'Detalle un dia', 'Detalle Intervalos'))
+informe = st.sidebar.selectbox('Elegí una de las opciones', ("Configuracion", 'Valores consolidados mes y diarios', 'Valores consolidados semanales', 'Detalle un dia', 'Detalle Intervalos'))
 if informe=="Configuracion":
     configuracion=pd.read_sql('SELECT * from configuracion', con)
     tmo=st.sidebar.number_input("TMO: ", value=configuracion.loc[0, "tmo"])
@@ -197,7 +197,7 @@ if informe=="Configuracion":
     # grupo_fecha=resultados.groupby(by="Fecha").sum()
     # grupo_fecha["rac_nec"]=grupo_fecha["rac_nec"]/2
     # st.table(grupo_fecha)
-if informe=="Valores consolidades mes y diarios":
+if informe=="Valores consolidados mes y diarios":
     configuracion=pd.read_sql('SELECT * from configuracion', con)
     st.sidebar.text("Datos de configuración")
     st.sidebar.text("TMO: "+str(configuracion.loc[0,"tmo"]))
@@ -234,6 +234,38 @@ if informe=="Valores consolidades mes y diarios":
     st.pyplot(fig2)
     
     st.table(dato_dia)
+    
+if informe=="Valores consolidados semanales":
+    configuracion=pd.read_sql('SELECT * from configuracion', con)
+    st.sidebar.text("Datos de configuración")
+    st.sidebar.text("TMO: "+str(configuracion.loc[0,"tmo"]))
+    st.sidebar.text("Nivel Servicio: "+str(configuracion.loc[0,"ns"]))
+    st.sidebar.text("Umbral: "+str(configuracion.loc[0,"umbral"]))
+    st.sidebar.text("Tasa Aband: "+str(configuracion.loc[0,"tasa_aband"])) 
+    dato_semana=pd.read_sql('SELECT * from s_dia_semana', con)
+    st.table(dato_semana)
+    
+    # fig1 = go.Figure()
+    fig1 = make_subplots(specs=[[{"secondary_y": True}]])
+ 
+    fig1.add_trace(go.Scatter(x=dato_semana["dia_semana"], y=dato_semana["ocupacion"],name="Ocupacion"),secondary_y=True)
+
+    fig1.add_trace(go.Scatter(x=dato_semana["dia_semana"], y=dato_semana["volumen_prono"],name="Volumen Pronosticado"))
+
+    fig1.update_xaxes(type='category')
+    fig1.update_layout(height=450, width=1200)
+    st.plotly_chart(fig1, use_container_width=True)
+    
+    st.subheader("Histograma Ocupacion")
+    fig, ax = plt.subplots()
+    ax.hist(dato_semana["ocupacion"], bins=90)
+    st.pyplot(fig)
+    
+    st.subheader("Volumen vs Ocupacion")
+    fig2, ax2 = plt.subplots()
+    ax2.scatter(dato_semana["ocupacion"],dato_semana["volumen_prono"])
+    st.pyplot(fig2)
+
     
 if informe=="Detalle un dia":    
     configuracion=pd.read_sql('SELECT * from configuracion', con)
